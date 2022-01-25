@@ -11,6 +11,32 @@ datasource db {
 }
 
 model Engine {
-  id  Int @id @default(autoincrement())
-  key String @unique
+  id            Int           @id @default(autoincrement())
+  key           String        @unique
+  tournamentId  Int
+  tournament    Tournament    @relation(fields: [tournamentId], references: [id])
+  participating Participant[]
+}
+
+model Tournament {
+  id      Int      @id @default(autoincrement())
+  engines Engine[]
+}
+
+model Game {
+  id           Int           @id @default(autoincrement())
+  active       Boolean       @default(false)
+  sequence     Json
+  participants Participant[]
+}
+
+model Participant {
+  id       Int    @id @default(autoincrement())
+  color    String
+  engineId Int
+  gameId   Int
+  game     Game   @relation(fields: [gameId], references: [id])
+  engine   Engine @relation(fields: [engineId], references: [id])
+
+  @@unique([gameId, color])
 }
