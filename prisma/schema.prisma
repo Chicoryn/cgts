@@ -32,6 +32,7 @@ model Game {
 
 model Participant {
   id       Int    @id @default(autoincrement())
+  key      String @unique
   color    String
   engineId Int
   gameId   Int
