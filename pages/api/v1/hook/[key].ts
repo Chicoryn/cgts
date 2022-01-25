@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../../../lib/db';
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-const prisma = new PrismaClient();
 
 type Data = {
   error?: string

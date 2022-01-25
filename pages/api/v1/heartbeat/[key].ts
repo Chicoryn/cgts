@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../../../lib/db';
 import { randomBytes } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-const prisma = new PrismaClient();
 
 type Data = {
   sequence?: Array<string>,
