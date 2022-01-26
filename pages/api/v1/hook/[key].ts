@@ -1,13 +1,20 @@
 import prisma from '../../../../lib/db';
 import { Prisma } from '@prisma/client';
+import { UpdateGameState } from '../../../../lib/update_game_state';
 import type { NextApiRequest, NextApiResponse } from 'next'
+
+interface HookNextApiRequest extends NextApiRequest {
+  body: {
+    response: string
+  }
+}
 
 type Data = {
   error?: string
 }
 
 export default async function handler(
-  req: NextApiRequest,
+  req: HookNextApiRequest,
   res: NextApiResponse<Data>
 )
 {
@@ -17,25 +24,25 @@ export default async function handler(
         key: <string>req.query.key
       },
       include: {
-        game: true,
-        engine: true
+        game: true
       }
     });
 
     if (!participant) {
       res.status(404).json({error: 'no such webhook'})
     } else {
-      const color = participant.color;
-      const body = JSON.parse(req.body);
-      const response = body['response'];
+      const response = req.body.response.toLowerCase();
 
       if (!response) {
         res.status(400).json({error: 'bad request'})
       } else {
-        let sequence = participant.game.sequence as Prisma.JsonArray;
-        sequence.push(`${color} ${response}`);
+        const updateGameState = new UpdateGameState(participant.game, participant, response);
 
-        res.status(200).json({})
+        if (await updateGameState.call()) {
+          res.status(200).json({});
+        } else {
+          res.status(400).json({error: 'invalid move'});
+        }
       }
     }
   } else {

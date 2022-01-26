@@ -36,7 +36,7 @@ export default async function handler(
         data: {
           key: randomBytes(8).toString('base64url'),
           name: req.body.name || '',
-          tournamentId: tournament.id
+          tournament: { connect: { id: tournament.id } }
         }
       });
 

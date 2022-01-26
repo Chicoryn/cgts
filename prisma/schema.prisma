@@ -34,7 +34,7 @@ model Game {
   tournamentId Int
   tournament   Tournament    @relation(fields: [tournamentId], references: [id])
   active       Boolean       @default(false)
-  sequence     Json
+  sequence     String[]
   participants Participant[]
 }
 
@@ -42,6 +42,7 @@ model Participant {
   id       Int    @id @default(autoincrement())
   key      String @unique
   color    String
+  winner   Boolean?
   engineId Int
   gameId   Int
   game     Game   @relation(fields: [gameId], references: [id])

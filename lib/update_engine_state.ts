@@ -38,9 +38,11 @@ export class UpdateEngineState {
             const isBlack = Math.random() < 0.5;
             const game = await prisma.game.create({
                 data: {
-                    tournamentId: this.tournament.id,
+                    tournament: { connect: { id: this.tournament.id } },
                     active: true,
-                    sequence: [],
+                    sequence: {
+                        set: []
+                    },
                     participants: {
                         create: [
                             {
@@ -96,7 +98,7 @@ export class UpdateEngineState {
             .filter(p => p.engineId == this.engine.id)
             [0];
 
-            return {
+        return {
             type: 'play',
             game: game,
             color: participant.color,
