@@ -1,5 +1,5 @@
 import prisma from '../../../../lib/db';
-import { randomBytes } from 'crypto'
+import { StateAction, UpdateEngineState } from '../../../../lib/update_engine_state';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
@@ -7,7 +7,7 @@ type Data = {
   action?: string,
   webhook_url?: string,
   error?: string
-}
+} | ''
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,35 +17,33 @@ export default async function handler(
   if (req.method === 'GET') {
     const engine = await prisma.engine.findUnique({
       where: { key: <string>req.query.key },
-      include: {
-        participating: {
-          where: { game: { active: true } },
-          include: {
-            game: true
-          }
-        }
-      }
+      include: { tournament: true }
     });
 
     if (!engine) {
       res.status(404).json({
         error: 'no such engine'
-      })
-    } else if (!engine.participating.length) {
-      res.status(204).json({});
+      });
     } else {
-      const new_hook_key = randomBytes(8).toString('base64url');
-      const participation = engine.participating[0];
-      const sequence = <Array<string>>participation.game.sequence;
+      const update_engine_state = new UpdateEngineState(engine.tournament, engine)
+      const action = await update_engine_state.call();
 
-      if (sequence[-1].startsWith(participation.color)) {
-        res.status(204).json({});
-      } else {
-        res.status(200).json({
-          sequence: sequence,
-          action: `genmove ${participation.color}`,
-          webhook_url: `api/v1/hook/${new_hook_key}`
-        })
+      switch (action.type) {
+        case 'wait': {
+          res.status(204).send('')
+          break
+        }
+        case 'play': {
+          const action_ = <Extract<StateAction, {type: 'play'}>>action;
+          debugger;
+
+          res.status(200).json({
+            sequence: <string[]>action_.game.sequence,
+            action: `genmove ${action_.color}`,
+            webhook_url: `api/v1/hook/${action_.hook_key}`
+          })
+          break
+        }
       }
     }
   } else {
