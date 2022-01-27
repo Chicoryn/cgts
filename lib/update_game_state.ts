@@ -58,18 +58,38 @@ export class UpdateGameState {
         ]);
 
         //
-        const participants = await prisma.participant.findMany({
-            where: {
-                NOT: { id: this.participant.id },
-                gameId: this.game.id
-            },
-            include: {
-                engine: true
-            }
-        });
+        if (isDone) {
+            const engines = await prisma.engine.findMany({
+                where: {
+                    NOT: { id: this.participant.engineId },
+                    tournamentId: this.game.tournamentId,
+                    participating: {
+                        every: {
+                            game: {
+                                active: false
+                            }
+                        }
+                    }
+                }
+            });
 
-        for (let participant of participants) {
-            await wakeUp(participant.engine)
+            for (let engine of engines) {
+                await wakeUp(engine)
+            }
+        } else {
+            const participants = await prisma.participant.findMany({
+                where: {
+                    NOT: { id: this.participant.id },
+                    gameId: this.game.id,
+                },
+                include: {
+                    engine: true
+                }
+            });
+
+            for (let participant of participants) {
+                await wakeUp(participant.engine)
+            }
         }
 
         return true;
