@@ -13,9 +13,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
     <header className='site-header'>
       <nav>
-        <Link href='/' passHref>
-          <Image src='/null.png' alt='CGTS' width='100px' height="40px" />
-        </Link>
+        <Image src='/null.png' alt='CGTS' width='100px' height="40px" />
         <Link href='/'>Tournaments</Link>
         <Link href='/tournament'>New Tournament</Link>
       </nav>
