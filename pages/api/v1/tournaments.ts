@@ -9,15 +9,28 @@ export default async function handler(
   if (req.method === 'GET') {
     const tournaments = await prisma.tournament.findMany({
       include: {
-        engines: true
+        engines: true,
+        games: true
       }
     });
 
-    res.status(200).json(tournaments);
+    res.status(200).json(
+      tournaments.map(tournament => {
+        return {
+          id: tournament.id,
+          name: tournament.name,
+          createdAt: tournament.createdAt,
+          updatedAt: tournament.updatedAt,
+          engines: tournament.engines,
+          numGames: tournament.games.length
+        };
+      })
+    );
   } else if (req.method === 'POST') {
     const tournament = await prisma.tournament.create({
       data: {
-        name: <string>req.query.name
+        name: req.body.name,
+        maxActiveGames: parseInt(req.body.maxActiveGames) || 1,
       }
     });
 

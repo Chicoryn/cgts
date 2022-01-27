@@ -1,0 +1,17 @@
+.form input {
+    border-radius: 5px;
+    padding: 5px 5px 6px 5px;
+    border: 1px solid #bbb;
+    font-size: 14px;
+    margin: 0 5px;
+}
+
+.form input:focus {
+    outline: #999;
+}
+
+.new_engine {
+    margin-left: 0.5em;
+    font-size: 50%;
+    opacity: 0.5;
+}

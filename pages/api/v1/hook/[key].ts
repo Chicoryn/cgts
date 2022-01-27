@@ -1,5 +1,4 @@
 import prisma from '../../../../lib/db';
-import { Prisma } from '@prisma/client';
 import { UpdateGameState } from '../../../../lib/update_game_state';
 import type { NextApiRequest, NextApiResponse } from 'next'
 

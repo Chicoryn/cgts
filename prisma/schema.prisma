@@ -14,6 +14,7 @@ model Engine {
   id            Int           @id @default(autoincrement())
   name          String
   key           String        @unique
+  createdAt      DateTime @default(now())
   tournamentId  Int
   tournament    Tournament    @relation(fields: [tournamentId], references: [id])
   participating Participant[]
@@ -33,20 +34,22 @@ model Game {
   id           Int           @id @default(autoincrement())
   tournamentId Int
   tournament   Tournament    @relation(fields: [tournamentId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   active       Boolean       @default(false)
   sequence     String[]
   participants Participant[]
 }
 
 model Participant {
-  id       Int    @id @default(autoincrement())
-  key      String @unique
+  id       Int      @id @default(autoincrement())
+  key      String   @unique
   color    String
   winner   Boolean?
   engineId Int
   gameId   Int
-  game     Game   @relation(fields: [gameId], references: [id])
-  engine   Engine @relation(fields: [engineId], references: [id])
+  game     Game     @relation(fields: [gameId], references: [id])
+  engine   Engine   @relation(fields: [engineId], references: [id])
 
   @@unique([gameId, color])
 }
