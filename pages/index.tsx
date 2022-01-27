@@ -3,6 +3,7 @@ import { Tournament, Engine } from '@prisma/client';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import { useEffect, useState } from 'react';
 import fromNow from 'fromnow';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const columns: TableColumn<Tournament & { numGames: number, engines: Engine[] }>[] = [
@@ -10,7 +11,7 @@ const Home: NextPage = () => {
       name: 'Name',
       selector: row => row.name,
       cell: (row, index, column, id) => {
-        return <a href={`tournament/${row.id}`}>{row.name}</a>;
+        return <Link href={`tournament/${row.id}`}>{row.name}</Link>;
       }
     },
     {

@@ -6,20 +6,7 @@ import { useEffect, useState } from 'react';
 import fromNow from 'fromnow';
 import { useRouter } from 'next/router'
 import { EngineWithStatistics, TournamentWithEnginesAndGames, GameWithParticipants } from '../api/v1/tournaments/[id]';
-
-function getTournament(id: string): TournamentWithEnginesAndGames | null {
-  const [tournament, setTournament] = useState(null);
-  useEffect(() => {
-    if (!id)
-      return;
-
-    fetch(`/api/v1/tournaments/${id}`)
-      .then(res => res.json())
-      .then(tournament => setTournament(tournament));
-  }, [id]);
-
-  return tournament;
-}
+import Link from 'next/link';
 
 function renderEnginesDataTable(engines: EngineWithStatistics[]) {
   const columns: TableColumn<EngineWithStatistics>[] = [
@@ -79,12 +66,23 @@ function renderGamesDataTable(games: GameWithParticipants[], engines: EngineWith
 const Tournament: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const tournament = getTournament(id as string);
+  const [tournament, setTournament] = useState<TournamentWithEnginesAndGames | null>(null);
+
+  useEffect(() => {
+    if (!id)
+      return;
+
+    fetch(`/api/v1/tournaments/${id}`)
+      .then(res => res.json())
+      .then(tournament => setTournament(tournament as TournamentWithEnginesAndGames));
+  }, [id]);
 
   return <>
     <h1>
       {tournament?.name}
-      <a className={styles.new_engine} href={`/tournament/${id}/engine`}>Add new Engine</a>
+      <span className={styles.new_engine}>
+        <Link href={`/tournament/${id}/engine`}>Add new Engine</Link>
+      </span>
     </h1>
     {tournament && renderEnginesDataTable(tournament.engines)}
 

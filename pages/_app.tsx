@@ -1,6 +1,8 @@
 import '../styles/globals.css'
 import Head from 'next/head'
 import type { AppProps } from 'next/app'
+import Link from 'next/link';
+import Image from 'next/image';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return <>
@@ -11,11 +13,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
     <header className='site-header'>
       <nav>
-        <a href='/'>
-          <img src='' />
-        </a>
-        <a href='/'>Tournaments</a>
-        <a href='/tournament'>New Tournament</a>
+        <Link href='/'>
+          <Image src='/null.png' width='100px' height="40px" />
+        </Link>
+        <Link href='/'>Tournaments</Link>
+        <Link href='/tournament'>New Tournament</Link>
       </nav>
     </header>
     <div className='site-content'>
