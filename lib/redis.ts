@@ -17,5 +17,6 @@ export async function wakeUp(engine: Engine) {
 }
 
 export async function sleepUntilWake(engine: Engine, timeout: number) {
+    await redis.del(`wake:${engine.id}`);
     await redis.blpop(`wake:${engine.id}`, timeout);
 }
