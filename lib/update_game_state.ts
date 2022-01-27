@@ -142,7 +142,7 @@ export class UpdateGameState {
                 }
             });
 
-            return { type: 'done', winner: winner[0], re: `${winner[0].color.toUpperCase}+R` };
+            return { type: 'done', winner: winner[0], re: `${winner[0].color.toUpperCase()}+R` };
         } else if (lastMove.includes('pass') && newSequence.length >= 2) {
             const moveBeforeLast = newSequence[newSequence.length - 2];
 
