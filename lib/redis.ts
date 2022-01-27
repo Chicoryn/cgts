@@ -4,19 +4,19 @@ import Redis from 'ioredis';
 const redis = new Redis(process.env.REDIS_URL);
 
 export async function wakeUp(engine: Engine) {
-    const duplicate = redis.duplicate();
-
-    try {
-        let pipeline = duplicate.pipeline();
-        pipeline.lpush(`wake:${engine.id}`, '1');
-        pipeline.expire(`wake:${engine.id}`, 3);
-        await pipeline.exec();
-    } finally {
-        duplicate.disconnect();
-    }
+    let pipeline = redis.pipeline();
+    pipeline.lpush(`wake:${engine.id}`, '1');
+    pipeline.expire(`wake:${engine.id}`, 3);
+    await pipeline.exec();
 }
 
 export async function sleepUntilWake(engine: Engine, timeout: number) {
-    await redis.del(`wake:${engine.id}`);
-    await redis.blpop(`wake:${engine.id}`, timeout);
+    const duplicate = redis.duplicate();
+
+    try {
+        await duplicate.del(`wake:${engine.id}`);
+        await duplicate.blpop(`wake:${engine.id}`, timeout);
+    } finally {
+        duplicate.disconnect();
+    }
 }
