@@ -14,8 +14,8 @@ export type TournamentWithEnginesAndGames =
 function augmentEngine(engine: Engine, games: GameWithParticipants[]): EngineWithStatistics {
     return {
         ...engine,
-        wins: games.filter(g => g.participants.some(p => p.engineId == engine.id && p.winner)).length,
-        losses: games.filter(g => g.participants.some(p => p.engineId == engine.id && !p.winner)).length,
+        wins: games.filter(g => g.participants.some(p => p.engineId == engine.id && p.winner === true)).length,
+        losses: games.filter(g => g.participants.some(p => p.engineId == engine.id && p.winner === false)).length,
         played: games.filter(g => g.participants.some(p => p.engineId == engine.id)).length,
     }
 }
