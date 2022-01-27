@@ -1,7 +1,8 @@
-import { Engine, Game, Participant, Tournament } from '@prisma/client';
+import { Engine, Game, Participant } from '@prisma/client';
 import { randomBytes } from 'crypto'
 import Board from '@sabaki/go-board';
 import prisma from './db';
+import {wakeUp} from './redis';
 import { spawn } from 'child_process';
 import readline from 'readline';
 
@@ -55,6 +56,21 @@ export class UpdateGameState {
                 }
             }),
         ]);
+
+        //
+        const participants = await prisma.participant.findMany({
+            where: {
+                NOT: { id: this.participant.id },
+                gameId: this.game.id
+            },
+            include: {
+                engine: true
+            }
+        });
+
+        for (let participant of participants) {
+            await wakeUp(participant.engine)
+        }
 
         return true;
     }

@@ -1,4 +1,5 @@
 import prisma from '../../../../lib/db';
+import {sleepUntilWake} from '../../../../lib/redis';
 import { StateAction, UpdateEngineState } from '../../../../lib/update_engine_state';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -26,16 +27,22 @@ export default async function handler(
       });
     } else {
       const update_engine_state = new UpdateEngineState(engine.tournament, engine)
-      const action = await update_engine_state.call();
+      let action = await update_engine_state.call();
 
       switch (action.type) {
         case 'wait': {
-          res.status(204).send('')
-          break
+          await sleepUntilWake(engine, 10);
+
+          action = await update_engine_state.call();
+          if (action.type == 'wait') {
+            res.status(204).send('')
+            break
+          } else {
+            // fallthrough
+          }
         }
         case 'play': {
           const action_ = <Extract<StateAction, {type: 'play'}>>action;
-          debugger;
 
           res.status(200).json({
             sequence: <string[]>action_.game.sequence,
