@@ -133,7 +133,7 @@ export class UpdateGameState {
 
     async score(sequence: string[]): Promise<string | null> {
         const gnugo = spawn(
-            'gnugo',
+            '/usr/games/gnugo',
             ['--mode', 'gtp'],
             {
                 timeout: 3000
