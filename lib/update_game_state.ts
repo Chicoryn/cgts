@@ -1,13 +1,12 @@
-import { Engine, Game, Participant } from '@prisma/client';
+import { Game, Participant } from '@prisma/client';
 import { randomBytes } from 'crypto'
+import { score } from './score_game';
 import Board from '@sabaki/go-board';
 import prisma from './db';
 import {wakeUp} from './redis';
-import { spawn } from 'child_process';
-import readline from 'readline';
 
 type Evaluation =
-    | { type: 'done', winner: Participant }
+    | { type: 'done', winner: Participant, re: string }
     | { type: 'ongoing' };
 
 export class UpdateGameState {
@@ -28,12 +27,14 @@ export class UpdateGameState {
         const evaluation = await this.evaluate();
         const isDone = evaluation.type == 'done';
         const winnerId = isDone ? (<Extract<Evaluation, { type: 'done' }>>evaluation).winner.id : null;
+        const result = isDone ? (<Extract<Evaluation, { type: 'done' }>>evaluation).re : null;
 
         await prisma.$transaction([
             prisma.game.update({
                 where: { id: this.game.id },
                 data: {
                     active: !isDone,
+                    result: result,
                     sequence: {
                         push: `${this.participant.color} ${this.move}`
                     }
@@ -141,7 +142,7 @@ export class UpdateGameState {
                 }
             });
 
-            return { type: 'done', winner: winner[0] };
+            return { type: 'done', winner: winner[0], re: `${winner[0].color.toUpperCase}+R` };
         } else if (lastMove.includes('pass') && newSequence.length >= 2) {
             const moveBeforeLast = newSequence[newSequence.length - 2];
 
@@ -149,46 +150,22 @@ export class UpdateGameState {
                 return { type: 'ongoing' };
             }
 
-            const winningColor = await this.score(newSequence);
-            if (!winningColor) {
+            const result = await score(newSequence);
+            if (!result) {
                 return { type: 'ongoing' };
             }
 
             const winner = await prisma.participant.findMany({
                 where: {
-                    color: winningColor,
+                    color: result.color,
                     gameId: this.game.id
                 }
             });
 
-            return { type: 'done', winner: winner[0] };
+            return { type: 'done', winner: winner[0], re: result.re };
         } else {
             return { type: 'ongoing' };
         }
-    }
-
-    async score(sequence: string[]): Promise<string | null> {
-        const gnugo = spawn(
-            '/usr/games/gnugo',
-            ['--mode', 'gtp'],
-            {
-                timeout: 3000
-            }
-        );
-
-        for (const move of sequence) {
-            gnugo.stdin.write(`play ${move}\n`);
-        }
-        gnugo.stdin.write(`1000 estimate_score\n`);
-        gnugo.stdin.write(`2000 quit\n`);
-
-        for await (const line of readline.createInterface(gnugo.stdout)) {
-            if (line.startsWith('=1000')) {
-                return line.split(' ')[1][0].toLowerCase(); // e.g. B+127.5
-            }
-        }
-
-        return null;
     }
 
     isValidMove(): boolean {

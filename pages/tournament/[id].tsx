@@ -45,22 +45,32 @@ function renderGamesDataTable(games: GameWithParticipants[], engines: EngineWith
     {
       name: 'Black',
       selector: game => enginesById[game.participants[0].engineId].name,
+      sortable: true
     },
     {
       name: 'White',
       selector: game => enginesById[game.participants[1].engineId].name,
+      sortable: true
     },
     {
       name: 'Result',
-      selector: row => row.active ? 'None' : 'Done',
+      selector: row => row.result ? row.result : 'None',
+      sortable: true
     },
     {
       name: 'Created',
-      selector: game => fromNow(new Date(game.createdAt), { max: 2, suffix: true }),
+      selector: game => new Date(game.createdAt).toISOString(),
+      format: game => fromNow(new Date(game.createdAt), { max: 2, suffix: true }),
+      sortable: true
     }
   ];
 
-  return <DataTable columns={columns} data={games} />
+  return <DataTable
+    columns={columns}
+    data={games}
+    defaultSortFieldId={4}
+    defaultSortAsc={false}
+  />
 }
 
 const Tournament: NextPage = () => {
