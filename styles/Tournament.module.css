@@ -15,10 +15,3 @@
     font-size: 50%;
     opacity: 0.5;
 }
-
-.padded_container {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 0px 20px;
-    margin: 10px 100px;
-}

@@ -1,4 +1,4 @@
-import styles from '../styles/Tournament.module.css'
+import styles from '../styles/EngineDataTable.module.css'
 import DataTable, { TableColumn, ExpanderComponentProps  } from 'react-data-table-component';
 import { EngineWithStatistics } from '../pages/api/v1/tournaments/[id]';
 
