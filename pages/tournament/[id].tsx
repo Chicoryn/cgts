@@ -1,11 +1,9 @@
 import type { NextPage } from 'next'
 import styles from '../../styles/Tournament.module.css'
 import { Tournament } from '@prisma/client';
-import DataTable, { TableColumn, ExpanderComponentProps  } from 'react-data-table-component';
 import { useEffect, useState } from 'react';
-import fromNow from 'fromnow';
 import { useRouter } from 'next/router'
-import { EngineWithStatistics, TournamentWithEnginesAndGames, GameWithParticipants } from '../api/v1/tournaments/[id]';
+import { TournamentWithEnginesAndGames } from '../api/v1/tournaments/[id]';
 import Link from 'next/link';
 import TournamentDataTable from '../../components/TournamentDataTable';
 import GameDataTable from '../../components/GameDataTable';
