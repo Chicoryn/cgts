@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router'
 import { TournamentWithEnginesAndGames } from '../api/v1/tournaments/[id]';
 import Link from 'next/link';
-import TournamentDataTable from '../../components/TournamentDataTable';
+import EngineDataTable from '../../components/EngineDataTable';
 import GameDataTable from '../../components/GameDataTable';
 
 const Tournament: NextPage = () => {
@@ -30,7 +30,7 @@ const Tournament: NextPage = () => {
       </span>
     </h1>
 
-    {tournament && <TournamentDataTable engines={tournament.engines} />}
+    {tournament && <EngineDataTable engines={tournament.engines} />}
 
     <h2>Games</h2>
     {tournament && <GameDataTable games={tournament.games} engines={tournament.engines} />}

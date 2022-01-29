@@ -2,11 +2,11 @@ import styles from '../styles/Tournament.module.css'
 import DataTable, { TableColumn, ExpanderComponentProps  } from 'react-data-table-component';
 import { EngineWithStatistics } from '../pages/api/v1/tournaments/[id]';
 
-export type TournamentDataTableProps = {
+export type EngineDataTableProps = {
     engines: EngineWithStatistics[]
 };
 
-function TournamentExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
+function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
     const byOpponent = data.played.reduce(
         (acc, g) => {
             acc[g.opponent.name] ||= { wins: 0, losses: 0, count: 0};
@@ -56,11 +56,12 @@ function TournamentExpandedComponent({ data }: ExpanderComponentProps<EngineWith
             data={byOpponentRows}
             defaultSortFieldId={2}
             defaultSortAsc={false}
+            dense
         />
     </div>;
 }
 
-function TournamentDataTable({ engines }: TournamentDataTableProps) {
+function EngineDataTable({ engines }: EngineDataTableProps) {
     const columns: TableColumn<EngineWithStatistics>[] = [
         {
             name: 'Name',
@@ -94,8 +95,8 @@ function TournamentDataTable({ engines }: TournamentDataTableProps) {
         defaultSortFieldId={0}
         defaultSortAsc={true}
         expandableRows
-        expandableRowsComponent={TournamentExpandedComponent}
+        expandableRowsComponent={EngineExpandedComponent}
     />
 }
 
-export default TournamentDataTable;
+export default EngineDataTable;
