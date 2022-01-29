@@ -8,7 +8,11 @@ import { useRouter } from 'next/router'
 import { EngineWithStatistics, TournamentWithEnginesAndGames, GameWithParticipants } from '../api/v1/tournaments/[id]';
 import Link from 'next/link';
 
-function renderEnginesDataTable(engines: EngineWithStatistics[]) {
+type TournamentDataTableProps = {
+  engines: EngineWithStatistics[]
+};
+
+function TournamentDataTable({ engines }: TournamentDataTableProps) {
   const columns: TableColumn<EngineWithStatistics>[] = [
     {
       name: 'Name',
@@ -32,10 +36,18 @@ function renderEnginesDataTable(engines: EngineWithStatistics[]) {
     }
   ];
 
-  return <DataTable columns={columns} data={engines} />
+  return <DataTable
+    columns={columns}
+    data={engines}
+  />
 }
 
-function renderGamesDataTable(games: GameWithParticipants[], engines: EngineWithStatistics[]) {
+type GamesDataTableProps = {
+  games: GameWithParticipants[],
+  engines: EngineWithStatistics[]
+};
+
+function GamesDataTable({ games, engines }: GamesDataTableProps) {
   const enginesById = engines.reduce((acc: { [key: number]: EngineWithStatistics }, engine) => {
     acc[engine.id] = engine;
     return acc;
@@ -94,10 +106,11 @@ const Tournament: NextPage = () => {
         <Link href={`/tournament/${id}/engine`}>Add new Engine</Link>
       </span>
     </h1>
-    {tournament && renderEnginesDataTable(tournament.engines)}
+
+    {tournament && <TournamentDataTable engines={tournament.engines} />}
 
     <h2>Games</h2>
-    {tournament && renderGamesDataTable(tournament.games, tournament.engines)}
+    {tournament && <GamesDataTable games={tournament.games} engines={tournament.engines} />}
   </>;
 }
 
