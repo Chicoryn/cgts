@@ -2,8 +2,11 @@ import { Engine, Game, Participant, Tournament, Prisma } from '@prisma/client';
 import prisma from '../../../../lib/db';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+export type GameStatistics =
+    { won: boolean, opponent: { id: number, name: string } };
+
 export type EngineWithStatistics =
-    Engine & { wins: number, losses: number, played: number };
+    Engine & { played: GameStatistics[] };
 
 export type GameWithParticipants =
     Game & { participants: Participant[] };
@@ -11,12 +14,26 @@ export type GameWithParticipants =
 export type TournamentWithEnginesAndGames =
     Tournament & { engines: EngineWithStatistics[], games: GameWithParticipants[] };
 
-function augmentEngine(engine: Engine, games: GameWithParticipants[]): EngineWithStatistics {
+function augmentGameWithStatistics(game: GameWithParticipants, engines: Engine[]): GameStatistics {
+    const engineIds = engines.map(e => e.id);
+    const opponentParticipant = game.participants.find(p => engineIds.includes(p.engineId));
+    const opponent = engines.find(e => e.id == opponentParticipant?.engineId);
+
+    return {
+        won: !opponentParticipant?.winner,
+        opponent: {
+            id: opponent?.id || 0,
+            name: opponent?.name || ''
+        }
+    };
+}
+
+function augmentEngine(engine: Engine, engines: Engine[], games: GameWithParticipants[]): EngineWithStatistics {
+    const otherEngines = engines.filter(e => e.id != engine.id);
+
     return {
         ...engine,
-        wins: games.filter(g => g.participants.some(p => p.engineId == engine.id && p.winner === true)).length,
-        losses: games.filter(g => g.participants.some(p => p.engineId == engine.id && p.winner === false)).length,
-        played: games.filter(g => g.participants.some(p => p.engineId == engine.id)).length,
+        played: games.filter(g => g.participants.some(p => p.engineId == engine.id)).map(g => augmentGameWithStatistics(g, otherEngines)),
     }
 }
 
@@ -56,7 +73,7 @@ export default async function handler(
     } else {
         res.status(200).json({
             ...tournament,
-            engines: tournament.engines.map(engine => { return augmentEngine(engine, tournament.games) }),
+            engines: tournament.engines.map(engine => { return augmentEngine(engine, tournament.engines, tournament.games) }),
             games: tournament.games.map(game => { return augmentGame(game) })
         });
     }

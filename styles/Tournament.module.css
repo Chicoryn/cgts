@@ -15,3 +15,7 @@
     font-size: 50%;
     opacity: 0.5;
 }
+
+.padded_container svg {
+    padding: 15px;
+}
