@@ -132,7 +132,27 @@ export class UpdateEngineState {
         });
     }
 
-    async chooseOpponent(): Promise<Engine | null> {
+    async chooseDifferentOpponent(): Promise<Engine | null> {
+        const lastParticipant = await prisma.participant.findFirst({
+            where: {
+                NOT: {
+                    engineId: this.engine.id
+                },
+                game: {
+                    participants: {
+                        some: {
+                            engineId: this.engine.id
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                game: {
+                    createdAt: 'desc'
+                }
+            }
+        });
+
         return prisma.engine.findFirst({
             where: {
                 tournament: this.tournament,
@@ -143,8 +163,8 @@ export class UpdateEngineState {
                         }
                     }
                 },
-                NOT: {
-                    id: this.engine.id
+                id: {
+                    notIn: [this.engine.id].concat(lastParticipant ? [lastParticipant.engineId] : [])
                 }
             },
             orderBy: {
@@ -153,5 +173,38 @@ export class UpdateEngineState {
                 }
             }
         });
+    }
+
+    async chooseOpponent(): Promise<Engine | null> {
+        const numEngines = await prisma.engine.count({
+            where: {
+                tournamentId: this.tournament.id
+            }
+        });
+
+        if (numEngines > 2) {
+            return this.chooseDifferentOpponent();
+        } else {
+            return prisma.engine.findFirst({
+                where: {
+                    tournament: this.tournament,
+                    participating: {
+                        every: {
+                            game: {
+                                active: false
+                            }
+                        }
+                    },
+                    NOT: {
+                        id: this.engine.id
+                    }
+                },
+                orderBy: {
+                    participating: {
+                        _count: 'asc'
+                    }
+                }
+            });
+        }
     }
 }
