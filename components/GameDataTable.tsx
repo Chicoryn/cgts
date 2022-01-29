@@ -43,8 +43,8 @@ export default function GameDataTable({ games, engines }: GameDataTableProps) {
             right: true,
             selector: row => row.id,
             cell: (row, index, column, id) => {
-                return <Link href={`/api/v1/sgf/${row.id}`}>
-                    <Image className={styles.imageLink} src='/download.svg' width={20} height={20} />
+                return <Link href={`/api/v1/sgf/${row.id}`} passHref={false}>
+                    <Image alt='Download' className={styles.imageLink} src='/download.svg' width={20} height={20} />
                 </Link>;
             }
         }
