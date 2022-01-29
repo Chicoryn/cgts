@@ -6,7 +6,7 @@ export type EngineDataTableProps = {
     engines: EngineWithStatistics[]
 };
 
-function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
+function EngineExpandedDataTableComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
     const byOpponent = data.played.reduce(
         (acc, g) => {
             acc[g.opponent.name] ||= { wins: 0, losses: 0, count: 0};
@@ -50,7 +50,7 @@ function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStat
         },
     ];
 
-    return <div className={styles.padded_container}>
+    return <div className={styles.padded_card}>
         <DataTable
             columns={columns}
             data={byOpponentRows}
@@ -59,6 +59,20 @@ function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStat
             dense
         />
     </div>;
+}
+
+function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
+    if (!data.played.length) {
+        return <div className={styles.padded_container}>
+            No games has been recorded, connect an engine to CTGS using:
+
+            <pre>
+                cgts_client --key {data.key} -- command arguments...
+            </pre>
+        </div>;
+    } else {
+        return <EngineExpandedDataTableComponent data={data} />
+    }
 }
 
 function EngineDataTable({ engines }: EngineDataTableProps) {
