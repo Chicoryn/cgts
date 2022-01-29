@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import styles from '../../../styles/Tournament.module.css'
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent } from 'react';
 import { NextRouter, useRouter } from 'next/router'
 
 async function onSubmit(event: FormEvent<HTMLFormElement>, id: string, router: NextRouter) {

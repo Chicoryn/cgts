@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import styles from '../../styles/Tournament.module.css'
-import { Tournament, Engine, Game, Participant } from '@prisma/client';
+import { Tournament } from '@prisma/client';
 import DataTable, { TableColumn, ExpanderComponentProps  } from 'react-data-table-component';
 import { useEffect, useState } from 'react';
 import fromNow from 'fromnow';
@@ -15,30 +15,54 @@ type TournamentDataTableProps = {
 function TournamentExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
   const byOpponent = data.played.reduce(
     (acc, g) => {
-      acc[g.opponent.name] ||= { wins: 0, count: 0};
-      acc[g.opponent.name].wins += g.won ? 1 : 0;
+      acc[g.opponent.name] ||= { wins: 0, losses: 0, count: 0};
+      acc[g.opponent.name].wins += g.won === true ? 1 : 0;
+      acc[g.opponent.name].losses += g.won === false ? 1 : 0;
       acc[g.opponent.name].count += 1;
       return acc;
     },
-    {} as {[key: string]: {wins: number, count: number}}
+    {} as {[key: string]: {wins: number, losses: number, count: number}}
   );
+  const byOpponentRows = Object.entries(byOpponent).map(arg => {
+    const [name, { wins, losses, count }] = arg;
+
+    return {
+      name: name,
+      wins: wins,
+      losses: losses,
+      count: count
+    };
+  })
+
+  const columns: TableColumn<{name: string, wins: number, losses: number, count: number}>[] = [
+    {
+      name: 'Opponent',
+      selector: row => row.name,
+    },
+    {
+      name: 'Total played',
+      selector: row => row.count,
+      sortable: true
+    },
+    {
+      name: 'Wins',
+      selector: row => row.wins,
+      sortable: true
+    },
+    {
+      name: 'Losses',
+      selector: row => row.losses,
+      sortable: true
+    },
+  ];
 
   return <div className={styles.padded_container}>
-    {Object.entries(byOpponent).map(arg => {
-      const [opponent, { wins, count }] = arg;
-      const winRate = wins / (count + 1e-6);
-      const green = Math.floor(255.0 * winRate);
-      const red = Math.floor(255.0 - green);
-      const color = `#${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}00`;
-
-      return <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120' width='100' height='120'>
-        <title>{`${opponent} - ${100.0 * winRate}%`}</title>
-        <g fill={color}>
-          <rect width={100} height={100} rx={15} />
-        </g>
-        <text x='50' y='120' style={{ textAnchor: 'middle' }}>{opponent}</text>
-      </svg>;
-    })}
+    <DataTable
+      columns={columns}
+      data={byOpponentRows}
+      defaultSortFieldId={2}
+      defaultSortAsc={false}
+    />
   </div>;
 }
 
@@ -47,6 +71,7 @@ function TournamentDataTable({ engines }: TournamentDataTableProps) {
     {
       name: 'Name',
       selector: row => row.name,
+      sortable: true
     },
     {
       name: 'Key',
@@ -55,20 +80,25 @@ function TournamentDataTable({ engines }: TournamentDataTableProps) {
     {
       name: 'Total played',
       selector: row => row.played.length,
+      sortable: true
     },
     {
       name: 'Wins',
       selector: row => row.played.filter(g => g.won).length,
+      sortable: true
     },
     {
       name: 'Losses',
       selector: row => row.played.filter(g => !g.won).length,
+      sortable: true
     }
   ];
 
   return <DataTable
     columns={columns}
     data={engines}
+    defaultSortFieldId={0}
+    defaultSortAsc={true}
     expandableRows
     expandableRowsComponent={TournamentExpandedComponent}
   />
