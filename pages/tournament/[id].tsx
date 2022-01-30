@@ -17,9 +17,16 @@ const Tournament: NextPage = () => {
     if (!id)
       return;
 
-    fetch(`/api/v1/tournaments/${id}`)
-      .then(res => res.json())
-      .then(tournament => setTournament(tournament as TournamentWithEnginesAndGames));
+    function doFetchTournament() {
+      fetch(`/api/v1/tournaments/${id}`)
+        .then(res => res.json())
+        .then(tournament => setTournament(tournament as TournamentWithEnginesAndGames));
+    }
+
+    const interval = setInterval(doFetchTournament, 15_000);
+    doFetchTournament();
+
+    return () => clearInterval(interval);
   }, [id]);
 
   return <>
