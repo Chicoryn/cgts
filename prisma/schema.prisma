@@ -14,7 +14,7 @@ model Engine {
   id            Int           @id @default(autoincrement())
   name          String
   key           String        @unique
-  createdAt      DateTime @default(now())
+  createdAt     DateTime      @default(now())
   tournamentId  Int
   tournament    Tournament    @relation(fields: [tournamentId], references: [id])
   participating Participant[]
