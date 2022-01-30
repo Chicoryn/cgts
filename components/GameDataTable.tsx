@@ -55,5 +55,6 @@ export default function GameDataTable({ games, engines }: GameDataTableProps) {
         data={games}
         defaultSortFieldId={4}
         defaultSortAsc={false}
+        pagination
     />
 }
