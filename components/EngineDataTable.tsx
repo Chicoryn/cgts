@@ -2,6 +2,14 @@ import styles from '../styles/EngineDataTable.module.css'
 import DataTable, { TableColumn, ExpanderComponentProps  } from 'react-data-table-component';
 import { EngineWithStatistics } from '../pages/api/v1/tournaments/[id]';
 
+function percentage(amount: number, total: number): string {
+    if (total < 1) {
+        return '-';
+    } else {
+        return `${(100.0 * amount / total).toFixed(1)}% (${amount})`;
+    }
+}
+
 export type EngineDataTableProps = {
     engines: EngineWithStatistics[]
 };
@@ -34,18 +42,18 @@ function EngineExpandedDataTableComponent({ data }: ExpanderComponentProps<Engin
             selector: row => row.name,
         },
         {
-            name: 'Total played',
-            selector: row => row.count,
-            sortable: true
-        },
-        {
             name: 'Wins',
-            selector: row => row.wins,
+            selector: row => percentage(row.wins, row.count),
             sortable: true
         },
         {
             name: 'Losses',
-            selector: row => row.losses,
+            selector: row => percentage(row.losses, row.count),
+            sortable: true
+        },
+        {
+            name: 'Total played',
+            selector: row => row.count,
             sortable: true
         },
     ];
@@ -54,7 +62,7 @@ function EngineExpandedDataTableComponent({ data }: ExpanderComponentProps<Engin
         <DataTable
             columns={columns}
             data={byOpponentRows}
-            defaultSortFieldId={2}
+            defaultSortFieldId={1}
             defaultSortAsc={false}
             dense
         />
@@ -87,20 +95,20 @@ function EngineDataTable({ engines }: EngineDataTableProps) {
             selector: row => row.key,
         },
         {
-            name: 'Total played',
-            selector: row => row.played.length,
-            sortable: true
-        },
-        {
             name: 'Wins',
-            selector: row => row.played.filter(g => g.won).length,
+            selector: row => percentage(row.played.filter(g => g.won === true).length, row.played.length),
             sortable: true
         },
         {
             name: 'Losses',
-            selector: row => row.played.filter(g => !g.won).length,
+            selector: row => percentage(row.played.filter(g => g.won === false).length, row.played.length),
             sortable: true
-        }
+        },
+        {
+            name: 'Total played',
+            selector: row => row.played.length,
+            sortable: true
+        },
     ];
 
     return <DataTable
