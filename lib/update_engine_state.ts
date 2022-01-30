@@ -1,6 +1,7 @@
 import { Engine, Game, Participant, Tournament, Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto'
 import prisma from './db';
+import { redlock } from './redis';
 
 export type StateAction =
     | { type: 'wait' }
@@ -15,9 +16,7 @@ export class UpdateEngineState {
         // pass
     }
 
-    // TODO prisma interactive transactions are in preview at the moment, once
-    // they are stable. We need to wrap this method in a transaction.
-    async call(): Promise<StateAction> {
+    async _call(): Promise<StateAction> {
         const active = await this.myActiveGames();
 
         if (active.length > 0) {
@@ -71,6 +70,16 @@ export class UpdateEngineState {
         }
 
         return { type: 'wait' };
+    }
+
+    async call(): Promise<StateAction> {
+        let lock = await redlock.acquire([this.tournament.id.toString()], 1000);
+
+        try {
+            return await this._call();
+        } finally {
+            await lock.release();
+        }
     }
 
     isMyTurn(game: Game & { participants: Participant[] }): boolean {

@@ -1,7 +1,19 @@
 import { Engine } from '@prisma/client';
 import Redis from 'ioredis';
+import Redlock from 'redlock';
 
-const redis = new Redis(process.env.REDIS_URL);
+export const redis = new Redis(process.env.REDIS_URL);
+export const redlock = new Redlock(
+    [redis],
+    {
+        driftFactor: 0.01,
+        retryCount: 10,
+        retryDelay: 100,
+        retryJitter: 50,
+        automaticExtensionThreshold: 500,
+    }
+    );
+
 
 export async function wakeUp(engine: Engine) {
     let pipeline = redis.pipeline();
