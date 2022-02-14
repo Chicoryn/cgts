@@ -72,9 +72,11 @@ function EngineExpandedDataTableComponent({ data }: ExpanderComponentProps<Engin
 function EngineExpandedComponent({ data }: ExpanderComponentProps<EngineWithStatistics>) {
     if (!data.played.length) {
         return <div className={styles.padded_container}>
-            No games has been recorded, connect an engine using:
+            <p className={styles.small_text}>
+                No games has been recorded, connect an engine using:
+            </p>
 
-            <pre>
+            <pre className={styles.small_text}>
                 cgts_client --key {data.key} -- command arguments...
             </pre>
         </div>;
